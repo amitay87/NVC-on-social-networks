@@ -33,6 +33,9 @@ A basic system that ranks content by the **diversity** of people reacting to it,
 ✅ Ranking by diversity score  
 ✅ Simple UI with English/Hebrew toggle  
 
+
+![Screenshot POC - Bridge Demo.png](Screenshot%20POC%20-%20Bridge%20Demo.png)
+
 ### How to Run
 
 ```bash
