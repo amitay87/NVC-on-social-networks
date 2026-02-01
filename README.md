@@ -11,6 +11,24 @@
 
 A basic system that ranks content by the **diversity** of people reacting to it, rather than just by the number of likes.
 
+### Development Approach
+
+We're pursuing two parallel tracks:
+
+1. **Fast POC (this repository)** - Building a minimal social network from scratch for rapid prototyping and proof of concept
+   - Quick iterations and experimentation
+   - Demonstrates core diversity scoring algorithm
+   - Simple Flask-based implementation
+   - Perfect for testing ideas and gathering feedback
+
+2. **Long-term solution** - Building on top of Diaspora (separate track)
+   - Leveraging mature, battle-tested federated social network
+   - Full feature set (profiles, privacy, federation, etc.)
+   - AGPL-3.0 open source
+   - Production-ready infrastructure
+
+This POC serves as a testbed for the diversity scoring concepts before integrating them into a full-featured platform.
+
 ### Core Concept
 
 - Each user gets a political profile in three dimensions:
@@ -106,6 +124,24 @@ Then open: **http://localhost:5000**
 ### מה זה?
 
 מערכת בסיסית שמדרגת תוכן לפי **שונות** במחנות של המגיבים, במקום רק לפי כמות הלייקים.
+
+### גישת הפיתוח
+
+אנחנו עובדים בשני כיוונים במקביל:
+
+1. **POC מהיר (הריפוזיטורי הזה)** - בניית רשת חברתית מינימלית מאפס לצורך הדגמה והוכחת היתכנות
+   - איטרציות מהירות וניסויים
+   - הדגמה של אלגוריתם ציון הגיוון המרכזי
+   - מימוש פשוט מבוסס Flask
+   - מושלם לבדיקת רעיונות ואיסוף פידבק
+
+2. **פתרון לטווח ארוך** - בנייה על גבי Diaspora (מסלול נפרד)
+   - ניצול של רשת חברתית מבוזרת בוגרת ומוכחת
+   - סט תכונות מלא (פרופילים, פרטיות, פדרציה וכו')
+   - קוד פתוח AGPL-3.0
+   - תשתית מוכנה לייצור
+
+ה-POC הזה משמש כמעבדה לבדיקת מושגי ציון הגיוון לפני שילובם בפלטפורמה מלאה.
 
 ### הרעיון המרכזי
 
