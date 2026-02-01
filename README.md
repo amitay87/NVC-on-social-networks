@@ -1,4 +1,4 @@
-# POC - Social Network with Diversity Score 
+# POC - Bridge (Temporary name) - Social Network with Diversity Score 
 
 [English](#english) | [עברית](#hebrew)
 
