@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>POC - רשת חברתית עם ציון גיוון</title>
+    <title>POC - Social Network with Diversity Score</title>
     <style>
         * {
             box-sizing: border-box;
@@ -28,6 +28,23 @@
             border-radius: 8px;
             margin-bottom: 20px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .lang-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #f0f2f5;
+            border: 1px solid #ddd;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .lang-toggle:hover {
+            background: #e4e6eb;
         }
         
         h1 {
@@ -227,33 +244,38 @@
 <body>
     <div class="container">
         <header>
-            <h1>🌈 רשת חברתית עם ציון גיוון</h1>
-            <p>תוכן שמקבל תגובות ממגוון רחב של אנשים מקבל ציון גבוה יותר</p>
+            <button class="lang-toggle" onclick="toggleLanguage()">
+                <span id="langButton">עברית</span>
+            </button>
+            <h1 id="mainTitle">🌈 Social Network with Diversity Score</h1>
+            <p id="subtitle">Content that receives reactions from a diverse group of people gets a higher score</p>
             <div class="stats" id="stats"></div>
         </header>
         
         <div class="legend">
-            <strong>איך זה עובד?</strong><br>
-            • המערכת מנתחת את הפרופיל הפוליטי של כל משתמש על בסיס התגובות שלו<br>
-            • פוסטים ותגובות מדורגים לפי <strong>שונות</strong> במחנות של המגיבים<br>
-            • ככל שיותר אנשים ממחנות שונים מגיבים - הציון גבוה יותר<br>
-            • ציון גבוה = תוכן שמגשר בין מחנות שונים
+            <strong id="legendTitle">How does it work?</strong><br>
+            <span id="legendText">
+                • The system analyzes each user's political profile based on their reactions<br>
+                • Posts and comments are ranked by <strong>diversity</strong> in the camps of those reacting<br>
+                • The more people from different camps react - the higher the score<br>
+                • High score = content that bridges different camps
+            </span>
         </div>
         
         <div class="user-selector">
-            <label><strong>בחר משתמש:</strong></label>
+            <label><strong id="selectUserLabel">Select user:</strong></label>
             <select id="currentUser">
-                <option value="">-- בחר משתמש --</option>
+                <option value="" id="selectUserOption">-- Select user --</option>
             </select>
             <div class="new-user">
-                <input type="text" id="newUserName" placeholder="שם משתמש חדש">
-                <button onclick="createUser()">הוסף משתמש</button>
+                <input type="text" id="newUserName" placeholder="">
+                <button onclick="createUser()" id="addUserBtn">Add User</button>
             </div>
         </div>
         
         <div class="create-post">
-            <textarea id="postContent" placeholder="מה עובר לך בראש?"></textarea>
-            <button onclick="createPost()">פרסם</button>
+            <textarea id="postContent" placeholder=""></textarea>
+            <button onclick="createPost()" id="publishBtn">Publish</button>
         </div>
         
         <div id="posts"></div>
@@ -263,6 +285,97 @@
         let currentUserId = null;
         let users = [];
         let posts = [];
+        let currentLang = 'en'; // Default language
+        
+        const translations = {
+            en: {
+                mainTitle: '🌈 Social Network with Diversity Score',
+                subtitle: 'Content that receives reactions from a diverse group of people gets a higher score',
+                legendTitle: 'How does it work?',
+                legendText: `• The system analyzes each user's political profile based on their reactions<br>
+                • Posts and comments are ranked by <strong>diversity</strong> in the camps of those reacting<br>
+                • The more people from different camps react - the higher the score<br>
+                • High score = content that bridges different camps`,
+                selectUserLabel: 'Select user:',
+                selectUserOption: '-- Select user --',
+                newUserPlaceholder: 'New username',
+                addUserBtn: 'Add User',
+                postPlaceholder: "What's on your mind?",
+                publishBtn: 'Publish',
+                addCommentBtn: 'Add Comment',
+                commentPrompt: 'Comment content:',
+                selectUserAlert: 'Please select a user',
+                enterNameAlert: 'Please enter a name',
+                enterContentAlert: 'Please enter content',
+                langButton: 'עברית',
+                users: 'users',
+                posts: 'posts',
+                comments: 'comments',
+                reactions: 'reactions',
+                avgDiversity: 'Avg diversity',
+                diversity: 'Diversity'
+            },
+            he: {
+                mainTitle: '🌈 רשת חברתית עם ציון גיוון',
+                subtitle: 'תוכן שמקבל תגובות ממגוון רחב של אנשים מקבל ציון גבוה יותר',
+                legendTitle: 'איך זה עובד?',
+                legendText: `• המערכת מנתחת את הפרופיל הפוליטי של כל משתמש על בסיס התגובות שלו<br>
+                • פוסטים ותגובות מדורגים לפי <strong>שונות</strong> במחנות של המגיבים<br>
+                • ככל שיותר אנשים ממחנות שונים מגיבים - הציון גבוה יותר<br>
+                • ציון גבוה = תוכן שמגשר בין מחנות שונים`,
+                selectUserLabel: 'בחר משתמש:',
+                selectUserOption: '-- בחר משתמש --',
+                newUserPlaceholder: 'שם משתמש חדש',
+                addUserBtn: 'הוסף משתמש',
+                postPlaceholder: 'מה עובר לך בראש?',
+                publishBtn: 'פרסם',
+                addCommentBtn: 'הוסף תגובה',
+                commentPrompt: 'תוכן התגובה:',
+                selectUserAlert: 'נא לבחור משתמש',
+                enterNameAlert: 'נא להזין שם',
+                enterContentAlert: 'נא להזין תוכן',
+                langButton: 'English',
+                users: 'משתמשים',
+                posts: 'פוסטים',
+                comments: 'תגובות',
+                reactions: 'ריאקציות',
+                avgDiversity: 'ממוצע גיוון',
+                diversity: 'גיוון'
+            }
+        };
+        
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'he' : 'en';
+            const html = document.documentElement;
+            
+            if (currentLang === 'he') {
+                html.setAttribute('lang', 'he');
+                html.setAttribute('dir', 'rtl');
+            } else {
+                html.setAttribute('lang', 'en');
+                html.setAttribute('dir', 'ltr');
+            }
+            
+            updateUIText();
+        }
+        
+        function updateUIText() {
+            const t = translations[currentLang];
+            
+            document.getElementById('mainTitle').textContent = t.mainTitle;
+            document.getElementById('subtitle').textContent = t.subtitle;
+            document.getElementById('legendTitle').textContent = t.legendTitle;
+            document.getElementById('legendText').innerHTML = t.legendText;
+            document.getElementById('selectUserLabel').innerHTML = '<strong>' + t.selectUserLabel + '</strong>';
+            document.getElementById('selectUserOption').textContent = t.selectUserOption;
+            document.getElementById('newUserName').placeholder = t.newUserPlaceholder;
+            document.getElementById('addUserBtn').textContent = t.addUserBtn;
+            document.getElementById('postContent').placeholder = t.postPlaceholder;
+            document.getElementById('publishBtn').textContent = t.publishBtn;
+            document.getElementById('langButton').textContent = t.langButton;
+            
+            loadStats(); // Refresh stats with new language
+        }
         
         const REACTIONS = {
             'like': '👍',
@@ -276,21 +389,23 @@
         async function loadStats() {
             const res = await fetch('/api/stats');
             const stats = await res.json();
+            const t = translations[currentLang];
             document.getElementById('stats').innerHTML = `
-                <span>👥 ${stats.total_users} משתמשים</span>
-                <span>📝 ${stats.total_posts} פוסטים</span>
-                <span>💬 ${stats.total_comments} תגובות</span>
-                <span>💙 ${stats.total_reactions} ריאקציות</span>
-                <span>🌈 ממוצע גיוון: ${stats.avg_diversity_score.toFixed(1)}</span>
+                <span>👥 ${stats.total_users} ${t.users}</span>
+                <span>📝 ${stats.total_posts} ${t.posts}</span>
+                <span>💬 ${stats.total_comments} ${t.comments}</span>
+                <span>💙 ${stats.total_reactions} ${t.reactions}</span>
+                <span>🌈 ${t.avgDiversity}: ${stats.avg_diversity_score.toFixed(1)}</span>
             `;
         }
         
         async function loadUsers() {
             const res = await fetch('/api/users');
             users = await res.json();
+            const t = translations[currentLang];
             
             const select = document.getElementById('currentUser');
-            select.innerHTML = '<option value="">-- בחר משתמש --</option>';
+            select.innerHTML = `<option value="" id="selectUserOption">${t.selectUserOption}</option>`;
             users.forEach(user => {
                 const option = document.createElement('option');
                 option.value = user.id;
@@ -305,7 +420,8 @@
         
         async function createUser() {
             const name = document.getElementById('newUserName').value.trim();
-            if (!name) return alert('נא להזין שם');
+            const t = translations[currentLang];
+            if (!name) return alert(t.enterNameAlert);
             
             await fetch('/api/users', {
                 method: 'POST',
@@ -318,10 +434,11 @@
         }
         
         async function createPost() {
-            if (!currentUserId) return alert('נא לבחור משתמש');
+            const t = translations[currentLang];
+            if (!currentUserId) return alert(t.selectUserAlert);
             
             const content = document.getElementById('postContent').value.trim();
-            if (!content) return alert('נא להזין תוכן');
+            if (!content) return alert(t.enterContentAlert);
             
             await fetch('/api/posts', {
                 method: 'POST',
@@ -334,9 +451,10 @@
         }
         
         async function createComment(postId) {
-            if (!currentUserId) return alert('נא לבחור משתמש');
+            const t = translations[currentLang];
+            if (!currentUserId) return alert(t.selectUserAlert);
             
-            const content = prompt('תוכן התגובה:');
+            const content = prompt(t.commentPrompt);
             if (!content) return;
             
             await fetch('/api/comments', {
@@ -349,7 +467,8 @@
         }
         
         async function addReaction(targetType, targetId, reactionType) {
-            if (!currentUserId) return alert('נא לבחור משתמש');
+            const t = translations[currentLang];
+            if (!currentUserId) return alert(t.selectUserAlert);
             
             await fetch('/api/reactions', {
                 method: 'POST',
@@ -377,6 +496,7 @@
         async function loadPosts() {
             const res = await fetch('/api/posts');
             posts = await res.json();
+            const t = translations[currentLang];
             
             const postsDiv = document.getElementById('posts');
             postsDiv.innerHTML = '';
@@ -394,7 +514,7 @@
                     <div class="post-header">
                         <div class="post-author">${post.author_name}</div>
                         <div class="diversity-score ${diversityClass}">
-                            🌈 גיוון: ${post.diversity_score.toFixed(1)}
+                            🌈 ${t.diversity}: ${post.diversity_score.toFixed(1)}
                         </div>
                     </div>
                     <div class="post-content">${post.content}</div>
@@ -431,7 +551,7 @@
                             `;
                         }).join('')}
                         <div class="add-comment">
-                            <button onclick="createComment(${post.id})">הוסף תגובה</button>
+                            <button onclick="createComment(${post.id})">${t.addCommentBtn}</button>
                         </div>
                     </div>
                 `;
@@ -440,6 +560,7 @@
         }
         
         // Initial load
+        updateUIText();
         loadUsers();
         loadPosts();
         loadStats();

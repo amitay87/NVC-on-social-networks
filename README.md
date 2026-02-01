@@ -1,0 +1,189 @@
+# POC - Social Network with Diversity Score / רשת חברתית עם ציון גיוון
+
+[English](#english) | [עברית](#hebrew)
+
+---
+
+<a name="english"></a>
+## English
+
+### What is this?
+
+A basic system that ranks content by the **diversity** of people reacting to it, rather than just by the number of likes.
+
+### Core Concept
+
+- Each user gets a political profile in three dimensions:
+  - Right ↔ Left
+  - Liberal ↔ Conservative
+  - Religious ↔ Atheist
+  - Vegan ↔ Carnivore
+
+- The profile updates dynamically based on the user's reactions
+
+- Posts and comments receive a **Diversity Score** calculated by the variance in profiles of those reacting
+
+- Content that receives positive reactions from a wide variety of camps = high score
+
+### Features
+
+✅ Posts and comments  
+✅ 6 reaction types: 👍 Like, ❤️ Love, 😠 Angry, 😂 Laugh, 🤔 Interested, 🤗 Empathy  
+✅ Automatic user profile calculation  
+✅ Ranking by diversity score  
+✅ Simple UI with English/Hebrew toggle  
+
+### How to Run
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Run
+python app.py
+```
+
+Then open: **http://localhost:5000**
+
+### How Does It Work?
+
+1. **Start**: Each user begins with a random profile in the three dimensions
+
+2. **Learning**: When a user reacts positively (👍❤️🤔🤗) to a post/comment, their profile shifts toward the content author's profile
+
+3. **Diversity Calculation**: 
+   - The system checks who reacted to each post/comment
+   - Calculates the variance in the profiles of those reacting
+   - More variance = higher diversity score
+
+4. **Ranking**: Posts and comments are displayed in order of diversity score (highest first)
+
+### Usage Examples
+
+**Scenario 1: Consensus Post**
+- Post: "Hello everyone!"
+- 5 right-wing users react 👍
+- Diversity score: **Low** (no variance)
+
+**Scenario 2: Bridging Post**
+- Post: "Let's talk about the economy"
+- 3 right-wing users react 👍
+- 3 left-wing users react 🤔
+- 2 centrist users react ❤️
+- Diversity score: **High** (wide variance)
+
+### POC Limitations
+
+⚠️ This is just a POC! In reality you'd need:
+- More sophisticated algorithm for political analysis
+- Account for reaction type (angry ≠ love)
+- Manipulation prevention
+- ML for actual camp identification
+- Database persistence
+
+### Possible Extensions
+
+1. **Text Analysis**: Use NLP to automatically identify political leanings from content
+2. **Reaction Weights**: Negative reactions (😠) should have different effects
+3. **Personalization**: Each user can choose which dimensions matter to them
+4. **Prediction**: Predict which content will get high diversity scores
+5. **Visualization**: Graphical display of reactor distribution
+
+### Additional Ideas
+
+- **"Bridges"**: Identify users who react positively to content from different camps
+- **"Echo"**: Warn when a user is only in a bubble of similar opinions
+- **"Healthy Debate"**: Identify discussions with diverse opinions but respectful tone
+
+---
+
+<a name="hebrew"></a>
+## עברית
+
+### מה זה?
+
+מערכת בסיסית שמדרגת תוכן לפי **שונות** במחנות של המגיבים, במקום רק לפי כמות הלייקים.
+
+### הרעיון המרכזי
+
+- כל משתמש מקבל פרופיל פוליטי בשלושה ממדים:
+  - ימין ↔ שמאל
+  - ליברלי ↔ שמרן
+  - אתאיסט ↔ דתי/מאמין
+  - טבעוני ↔ קרניבור
+
+- הפרופיל מתעדכן באופן דינמי על בסיס הריאקציות של המשתמש
+
+- פוסטים ותגובות מקבלים **ציון גיוון** שמחושב לפי השונות בפרופילים של המגיבים
+
+- תוכן שמקבל ריאקציות חיוביות ממגוון רחב של מחנות = ציון גבוה
+
+### תכונות
+
+✅ פוסטים ותגובות  
+✅ 6 סוגי ריאקציות: 👍 אהבתי, ❤️ אוהב, 😠 כועס, 😂 צוחק, 🤔 מעניין, 🤗 אמפתיה  
+✅ חישוב אוטומטי של פרופיל משתמש  
+✅ דירוג לפי ציון גיוון  
+✅ ממשק משתמש עם מעבר אנגלית/עברית  
+
+### איך להריץ
+
+```bash
+# התקנת dependencies
+pip install -r requirements.txt
+
+# הרצה
+python app.py
+```
+
+הגש ל: **http://localhost:5000**
+
+### איך זה עובד?
+
+1. **התחלה**: כל משתמש מתחיל עם פרופיל אקראי בשלושת הממדים
+
+2. **למידה**: כשמשתמש מגיב חיוביות (👍❤️🤔🤗) על פוסט/תגובה, הפרופיל שלו זז לכיוון הפרופיל של מחבר התוכן
+
+3. **חישוב גיוון**: 
+   - המערכת בודקת מי הגיב על כל פוסט/תגובה
+   - מחשבת את ה-variance בפרופילים של המגיבים
+   - ככל שיש יותר שונות = ציון גיוון גבוה יותר
+
+4. **דירוג**: פוסטים ותגובות מוצגים לפי סדר ציון הגיוון (מהגבוה לנמוך)
+
+### דוגמאות לשימוש
+
+**תרחיש 1: פוסט קונצנזוס**
+- פוסט: "שלום לכולם!"
+- 5 משתמשים ימניים מגיבים 👍
+- ציון גיוון: **נמוך** (אין שונות)
+
+**תרחיש 2: פוסט מגשר**
+- פוסט: "בואו נדבר על הכלכלה"
+- 3 משתמשים ימניים מגיבים 👍
+- 3 משתמשים שמאליים מגיבים 🤔
+- 2 משתמשים מרכז מגיבים ❤️
+- ציון גיוון: **גבוה** (שונות רחבה)
+
+### מגבלות ה-POC
+
+⚠️ זה POC בלבד! במציאות צריך:
+- אלגוריתם מתוחכם יותר לניתוח פוליטי
+- התייחסות לסוג הריאקציה (כועס ≠ אוהב)
+- מניעת מניפולציות
+- ML לזיהוי אמיתי של מחנות
+- שמירה במסד נתונים
+
+### הרחבות אפשריות
+
+1. **ניתוח טקסט**: שימוש ב-NLP לזיהוי אוטומטי של נטיות פוליטיות מהתוכן
+2. **משקלות לריאקציות**: ריאקציה שלילית (😠) צריכה להשפיע אחרת
+3. **התאמה אישית**: כל משתמש יכול לבחור אילו ממדים חשובים לו
+4. **חיזוי**: חיזוי מראש איזה תוכן יקבל ציון גיוון גבוה
+5. **ויזואליזציה**: הצגה גרפית של התפלגות המגיבים
+
+### רעיונות נוספים
+
+- **"גשרים"**: זיהוי משתמשים שמגיבים באופן חיובי על תוכן ממחנות שונים
+- **"הד"**: אזהרה כשמשתמש נמצא רק בבועה של דעות דומות
+- **"ויכוח בריא"**: זיהוי דיונים שבהם יש מגוון דעות אבל הטון נשאר מכבד
