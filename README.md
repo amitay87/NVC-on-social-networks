@@ -1,4 +1,4 @@
-# POC - Social Network with Diversity Score / רשת חברתית עם ציון גיוון
+# POC - Social Network with Diversity Score 
 
 [English](#english) | [עברית](#hebrew)
 
