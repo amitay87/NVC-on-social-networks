@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POC - רשת חברתית עם ציון גיוון</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #1877f2;
+            margin-bottom: 10px;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #65676b;
+        }
+        
+        .user-selector {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .create-post {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            resize: vertical;
+            min-height: 80px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        
+        button {
+            background: #1877f2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background: #166fe5;
+        }
+        
+        .post {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        
+        .post-author {
+            font-weight: bold;
+            color: #050505;
+        }
+        
+        .diversity-score {
+            background: #e7f3ff;
+            color: #1877f2;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .high-diversity {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .post-content {
+            color: #050505;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .reactions {
+            display: flex;
+            gap: 10px;
+            padding: 10px 0;
+            border-top: 1px solid #e4e6eb;
+            border-bottom: 1px solid #e4e6eb;
+            margin-bottom: 15px;
+        }
+        
+        .reaction-btn {
+            background: none;
+            border: 1px solid #ddd;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s;
+        }
+        
+        .reaction-btn:hover {
+            background: #f0f2f5;
+            transform: scale(1.1);
+        }
+        
+        .reaction-count {
+            font-size: 12px;
+            color: #65676b;
+        }
+        
+        .comments-section {
+            margin-top: 15px;
+        }
+        
+        .comment {
+            background: #f0f2f5;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .comment-author {
+            font-weight: bold;
+            font-size: 13px;
+        }
+        
+        .comment-content {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .add-comment {
+            margin-top: 10px;
+        }
+        
+        .add-comment textarea {
+            min-height: 50px;
+            font-size: 13px;
+        }
+        
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .new-user {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .new-user input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        
+        .legend {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            font-size: 13px;
+            color: #65676b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌈 רשת חברתית עם ציון גיוון</h1>
+            <p>תוכן שמקבל תגובות ממגוון רחב של אנשים מקבל ציון גבוה יותר</p>
+            <div class="stats" id="stats"></div>
+        </header>
+        
+        <div class="legend">
+            <strong>איך זה עובד?</strong><br>
+            • המערכת מנתחת את הפרופיל הפוליטי של כל משתמש על בסיס התגובות שלו<br>
+            • פוסטים ותגובות מדורגים לפי <strong>שונות</strong> במחנות של המגיבים<br>
+            • ככל שיותר אנשים ממחנות שונים מגיבים - הציון גבוה יותר<br>
+            • ציון גבוה = תוכן שמגשר בין מחנות שונים
+        </div>
+        
+        <div class="user-selector">
+            <label><strong>בחר משתמש:</strong></label>
+            <select id="currentUser">
+                <option value="">-- בחר משתמש --</option>
+            </select>
+            <div class="new-user">
+                <input type="text" id="newUserName" placeholder="שם משתמש חדש">
+                <button onclick="createUser()">הוסף משתמש</button>
+            </div>
+        </div>
+        
+        <div class="create-post">
+            <textarea id="postContent" placeholder="מה עובר לך בראש?"></textarea>
+            <button onclick="createPost()">פרסם</button>
+        </div>
+        
+        <div id="posts"></div>
+    </div>
+    
+    <script>
+        let currentUserId = null;
+        let users = [];
+        let posts = [];
+        
+        const REACTIONS = {
+            'like': '👍',
+            'love': '❤️',
+            'angry': '😠',
+            'laugh': '😂',
+            'interested': '🤔',
+            'empathy': '🤗'
+        };
+        
+        async function loadStats() {
+            const res = await fetch('/api/stats');
+            const stats = await res.json();
+            document.getElementById('stats').innerHTML = `
+                <span>👥 ${stats.total_users} משתמשים</span>
+                <span>📝 ${stats.total_posts} פוסטים</span>
+                <span>💬 ${stats.total_comments} תגובות</span>
+                <span>💙 ${stats.total_reactions} ריאקציות</span>
+                <span>🌈 ממוצע גיוון: ${stats.avg_diversity_score.toFixed(1)}</span>
+            `;
+        }
+        
+        async function loadUsers() {
+            const res = await fetch('/api/users');
+            users = await res.json();
+            
+            const select = document.getElementById('currentUser');
+            select.innerHTML = '<option value="">-- בחר משתמש --</option>';
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = user.name;
+                select.appendChild(option);
+            });
+            
+            select.onchange = (e) => {
+                currentUserId = e.target.value ? parseInt(e.target.value) : null;
+            };
+        }
+        
+        async function createUser() {
+            const name = document.getElementById('newUserName').value.trim();
+            if (!name) return alert('נא להזין שם');
+            
+            await fetch('/api/users', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name})
+            });
+            
+            document.getElementById('newUserName').value = '';
+            await loadUsers();
+        }
+        
+        async function createPost() {
+            if (!currentUserId) return alert('נא לבחור משתמש');
+            
+            const content = document.getElementById('postContent').value.trim();
+            if (!content) return alert('נא להזין תוכן');
+            
+            await fetch('/api/posts', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({author_id: currentUserId, content})
+            });
+            
+            document.getElementById('postContent').value = '';
+            await loadPosts();
+        }
+        
+        async function createComment(postId) {
+            if (!currentUserId) return alert('נא לבחור משתמש');
+            
+            const content = prompt('תוכן התגובה:');
+            if (!content) return;
+            
+            await fetch('/api/comments', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({post_id: postId, author_id: currentUserId, content})
+            });
+            
+            await loadPosts();
+        }
+        
+        async function addReaction(targetType, targetId, reactionType) {
+            if (!currentUserId) return alert('נא לבחור משתמש');
+            
+            await fetch('/api/reactions', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    user_id: currentUserId,
+                    target_type: targetType,
+                    target_id: targetId,
+                    reaction_type: reactionType
+                })
+            });
+            
+            await loadPosts();
+            await loadStats();
+        }
+        
+        function getReactionCounts(reactions) {
+            const counts = {};
+            reactions.forEach(r => {
+                counts[r.type] = (counts[r.type] || 0) + 1;
+            });
+            return counts;
+        }
+        
+        async function loadPosts() {
+            const res = await fetch('/api/posts');
+            posts = await res.json();
+            
+            const postsDiv = document.getElementById('posts');
+            postsDiv.innerHTML = '';
+            
+            for (const post of posts) {
+                const commentsRes = await fetch(`/api/posts/${post.id}/comments`);
+                const comments = await commentsRes.json();
+                
+                const reactionCounts = getReactionCounts(post.reactions);
+                const diversityClass = post.diversity_score > 30 ? 'high-diversity' : '';
+                
+                const postDiv = document.createElement('div');
+                postDiv.className = 'post';
+                postDiv.innerHTML = `
+                    <div class="post-header">
+                        <div class="post-author">${post.author_name}</div>
+                        <div class="diversity-score ${diversityClass}">
+                            🌈 גיוון: ${post.diversity_score.toFixed(1)}
+                        </div>
+                    </div>
+                    <div class="post-content">${post.content}</div>
+                    <div class="reactions">
+                        ${Object.keys(REACTIONS).map(type => `
+                            <button class="reaction-btn" onclick="addReaction('post', ${post.id}, '${type}')">
+                                ${REACTIONS[type]}
+                                ${reactionCounts[type] ? `<span class="reaction-count">${reactionCounts[type]}</span>` : ''}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <div class="comments-section">
+                        ${comments.map(comment => {
+                            const commentReactionCounts = getReactionCounts(comment.reactions);
+                            const commentDiversityClass = comment.diversity_score > 30 ? 'high-diversity' : '';
+                            return `
+                                <div class="comment">
+                                    <div class="comment-header">
+                                        <div class="comment-author">${comment.author_name}</div>
+                                        <div class="diversity-score ${commentDiversityClass}" style="font-size: 11px;">
+                                            🌈 ${comment.diversity_score.toFixed(1)}
+                                        </div>
+                                    </div>
+                                    <div class="comment-content">${comment.content}</div>
+                                    <div class="reactions">
+                                        ${Object.keys(REACTIONS).map(type => `
+                                            <button class="reaction-btn" style="font-size: 14px; padding: 4px 8px;" onclick="addReaction('comment', ${comment.id}, '${type}')">
+                                                ${REACTIONS[type]}
+                                                ${commentReactionCounts[type] ? `<span class="reaction-count">${commentReactionCounts[type]}</span>` : ''}
+                                            </button>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                        <div class="add-comment">
+                            <button onclick="createComment(${post.id})">הוסף תגובה</button>
+                        </div>
+                    </div>
+                `;
+                postsDiv.appendChild(postDiv);
+            }
+        }
+        
+        // Initial load
+        loadUsers();
+        loadPosts();
+        loadStats();
+        
+        // Refresh every 5 seconds
+        setInterval(() => {
+            loadPosts();
+            loadStats();
+        }, 5000);
+    </script>
+</body>
+</html>
