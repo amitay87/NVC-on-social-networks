@@ -102,6 +102,41 @@
             background: #166fe5;
         }
         
+        .demo-controls {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .demo-btn {
+            background: #42b983;
+            flex: 1;
+        }
+        
+        .demo-btn:hover {
+            background: #359268;
+        }
+        
+        .clear-btn {
+            background: #dc3545;
+            flex: 1;
+        }
+        
+        .clear-btn:hover {
+            background: #c82333;
+        }
+        
+        .demo-info {
+            font-size: 13px;
+            color: #65676b;
+            flex: 2;
+        }
+        
         .post {
             background: white;
             padding: 20px;
@@ -262,6 +297,12 @@
             </span>
         </div>
         
+        <div class="demo-controls">
+            <span class="demo-info" id="demoInfo">🎭 Try demo mode: Creates 18 users from different political camps with realistic interactions</span>
+            <button class="demo-btn" onclick="createDemo()" id="demoBtn">Load Demo</button>
+            <button class="clear-btn" onclick="clearData()" id="clearBtn">Clear All</button>
+        </div>
+        
         <div class="user-selector">
             <label><strong id="selectUserLabel">Select user:</strong></label>
             <select id="currentUser">
@@ -270,6 +311,10 @@
             <div class="new-user">
                 <input type="text" id="newUserName" placeholder="">
                 <button onclick="createUser()" id="addUserBtn">Add User</button>
+            </div>
+            <div class="demo-controls" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                <button onclick="initializeDemo()" style="background: #42b72a;" id="demoBtn">🎭 Load Demo</button>
+                <button onclick="resetData()" style="background: #dc3545; margin-left: 10px;" id="resetBtn">🗑️ Reset All</button>
             </div>
         </div>
         
@@ -313,7 +358,12 @@
                 comments: 'comments',
                 reactions: 'reactions',
                 avgDiversity: 'Avg diversity',
-                diversity: 'Diversity'
+                diversity: 'Diversity',
+                demoBtn: '🎭 Load Demo',
+                resetBtn: '🗑️ Reset All',
+                demoLoadedMsg: 'Demo loaded! 16 users with diverse political views and 12 posts with reactions.',
+                resetConfirm: 'Are you sure you want to reset all data?',
+                resetDoneMsg: 'All data cleared!'
             },
             he: {
                 mainTitle: '🌈 רשת חברתית עם ציון גיוון',
@@ -340,7 +390,19 @@
                 comments: 'תגובות',
                 reactions: 'ריאקציות',
                 avgDiversity: 'ממוצע גיוון',
-                diversity: 'גיוון'
+                diversity: 'גיוון',
+                demoBtn: '🎭 טען דמו',
+                resetBtn: '🗑️ אפס הכל',
+                demoLoadedMsg: 'דמו נטען! 16 משתמשים עם דעות פוליטיות מגוונות ו-12 פוסטים עם תגובות.',
+                resetConfirm: 'האם אתה בטוח שברצונך לאפס את כל הנתונים?',
+                resetDoneMsg: 'כל הנתונים נמחקו!',
+                demoInfo: '🎭 מצב דמו: יוצר 18 משתמשים ממחנות פוליטיים שונים עם אינטראקציות ריאליסטיות',
+                demoBtn: 'טען דמו',
+                clearBtn: 'נקה הכל',
+                demoLoading: 'יוצר דמו...',
+                demoSuccess: 'הדמו נטען! בדוק את הפוסטים הממוינים לפי ציון הגיוון.',
+                clearConfirm: 'האם אתה בטוח שברצונך למחוק את כל הנתונים? לא ניתן לבטל פעולה זו.',
+                clearSuccess: 'כל הנתונים נמחקו בהצלחה!'
             }
         };
         
@@ -373,6 +435,8 @@
             document.getElementById('postContent').placeholder = t.postPlaceholder;
             document.getElementById('publishBtn').textContent = t.publishBtn;
             document.getElementById('langButton').textContent = t.langButton;
+            document.getElementById('demoBtn').innerHTML = t.demoBtn;
+            document.getElementById('resetBtn').innerHTML = t.resetBtn;
             
             loadStats(); // Refresh stats with new language
         }
@@ -485,6 +549,59 @@
             await loadStats();
         }
         
+        async function createDemo() {
+            const t = translations[currentLang];
+            const btn = document.getElementById('demoBtn');
+            const originalText = btn.textContent;
+            
+            btn.textContent = t.demoLoading;
+            btn.disabled = true;
+            
+            try {
+                await fetch('/api/demo/create', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                
+                await loadUsers();
+                await loadPosts();
+                await loadStats();
+                
+                alert(t.demoSuccess);
+            } catch (error) {
+                console.error('Error creating demo:', error);
+                alert('Error creating demo data');
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
+        }
+        
+        async function clearData() {
+            const t = translations[currentLang];
+            
+            if (!confirm(t.clearConfirm)) {
+                return;
+            }
+            
+            try {
+                await fetch('/api/demo/clear', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                
+                currentUserId = null;
+                await loadUsers();
+                await loadPosts();
+                await loadStats();
+                
+                alert(t.clearSuccess);
+            } catch (error) {
+                console.error('Error clearing data:', error);
+                alert('Error clearing data');
+            }
+        }
+        
         function getReactionCounts(reactions) {
             const counts = {};
             reactions.forEach(r => {
@@ -565,11 +682,43 @@
         loadPosts();
         loadStats();
         
-        // Refresh every 5 seconds
-        setInterval(() => {
-            loadPosts();
-            loadStats();
-        }, 5000);
+        // Demo mode functions
+        async function initializeDemo() {
+            const t = translations[currentLang];
+            const demoBtn = document.getElementById('demoBtn');
+            const originalText = demoBtn.textContent;
+            demoBtn.textContent = currentLang === 'en' ? 'Loading...' : 'טוען...';
+            demoBtn.disabled = true;
+            
+            try {
+                await fetch('/api/demo/initialize', { method: 'POST' });
+                await loadUsers();
+                await loadPosts();
+                await loadStats();
+                alert(t.demoLoadedMsg);
+            } catch (error) {
+                alert('Error loading demo: ' + error.message);
+            } finally {
+                demoBtn.textContent = originalText;
+                demoBtn.disabled = false;
+            }
+        }
+        
+        async function resetData() {
+            const t = translations[currentLang];
+            if (!confirm(t.resetConfirm)) return;
+            
+            try {
+                await fetch('/api/demo/reset', { method: 'POST' });
+                currentUserId = null;
+                await loadUsers();
+                await loadPosts();
+                await loadStats();
+                alert(t.resetDoneMsg);
+            } catch (error) {
+                alert('Error resetting: ' + error.message);
+            }
+        }
     </script>
 </body>
 </html>

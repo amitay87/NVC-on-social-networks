@@ -3,6 +3,7 @@ from datetime import datetime
 import json
 from collections import defaultdict, Counter
 import math
+import random
 
 app = Flask(__name__)
 
@@ -150,6 +151,159 @@ def update_user_profile_from_reactions():
                 # הזז את הפרופיל של המשתמש לכיוון הממוצע (0.1 factor)
                 user.profile[dimension] = user.profile[dimension] * 0.9 + avg * 0.1
 
+# Demo data
+DEMO_USERS = [
+    # Right-wing users
+    {"name": "Sarah Cohen", "profile": {"left_right": 0.8, "liberal_conservative": 0.7, "zionist_anti": 0.9}},
+    {"name": "David Levy", "profile": {"left_right": 0.9, "liberal_conservative": 0.8, "zionist_anti": 0.95}},
+    {"name": "Rachel Ben-David", "profile": {"left_right": 0.7, "liberal_conservative": 0.6, "zionist_anti": 0.85}},
+    {"name": "Moshe Katz", "profile": {"left_right": 0.85, "liberal_conservative": 0.75, "zionist_anti": 0.9}},
+    
+    # Left-wing users
+    {"name": "Yael Shapira", "profile": {"left_right": -0.8, "liberal_conservative": -0.7, "zionist_anti": -0.6}},
+    {"name": "Ron Avraham", "profile": {"left_right": -0.85, "liberal_conservative": -0.75, "zionist_anti": -0.7}},
+    {"name": "Noa Friedman", "profile": {"left_right": -0.75, "liberal_conservative": -0.8, "zionist_anti": -0.5}},
+    {"name": "Amir Goldstein", "profile": {"left_right": -0.7, "liberal_conservative": -0.65, "zionist_anti": -0.55}},
+    
+    # Centrist/moderate users
+    {"name": "Maya Rosenberg", "profile": {"left_right": 0.1, "liberal_conservative": 0.2, "zionist_anti": 0.3}},
+    {"name": "Tom Israeli", "profile": {"left_right": -0.1, "liberal_conservative": 0.15, "zionist_anti": 0.25}},
+    {"name": "Dana Miller", "profile": {"left_right": 0.05, "liberal_conservative": -0.1, "zionist_anti": 0.2}},
+    {"name": "Eyal Bar", "profile": {"left_right": -0.05, "liberal_conservative": 0.05, "zionist_anti": 0.15}},
+    
+    # Liberal-right users
+    {"name": "Lior Stern", "profile": {"left_right": 0.6, "liberal_conservative": -0.5, "zionist_anti": 0.7}},
+    {"name": "Tamar Green", "profile": {"left_right": 0.5, "liberal_conservative": -0.6, "zionist_anti": 0.65}},
+    
+    # Conservative-left users
+    {"name": "Avi Klein", "profile": {"left_right": -0.6, "liberal_conservative": 0.5, "zionist_anti": 0.4}},
+    {"name": "Shira Mizrahi", "profile": {"left_right": -0.55, "liberal_conservative": 0.55, "zionist_anti": 0.45}},
+]
+
+DEMO_POSTS = [
+    # Right-wing posts
+    {"content": "We need strong security measures to protect our borders and citizens. Safety first!", "author_bias": "right"},
+    {"content": "Traditional family values are the foundation of our society. We must preserve them.", "author_bias": "right"},
+    {"content": "Free market economy drives innovation and prosperity. Less government intervention!", "author_bias": "right"},
+    
+    # Left-wing posts
+    {"content": "Universal healthcare is a human right. Everyone deserves access to quality medical care.", "author_bias": "left"},
+    {"content": "We need to address climate change urgently. Green energy is the future!", "author_bias": "left"},
+    {"content": "Social equality and workers' rights should be our top priority.", "author_bias": "left"},
+    
+    # Centrist/bridging posts
+    {"content": "Let's find common ground on education reform. Our children deserve the best.", "author_bias": "center"},
+    {"content": "Economic growth AND environmental protection - we can achieve both!", "author_bias": "center"},
+    {"content": "Technology is transforming our lives. How can we use it responsibly?", "author_bias": "center"},
+    
+    # Controversial but could attract diverse views
+    {"content": "What's your view on balancing personal freedom with public health measures?", "author_bias": "center"},
+    {"content": "Can we discuss immigration policy without the political rhetoric?", "author_bias": "center"},
+    {"content": "The role of government in the 21st century - what should it be?", "author_bias": "center"},
+]
+
+def calculate_political_alignment(profile1, profile2):
+    """Calculate alignment between two political profiles (0-1, higher = more aligned)"""
+    total_distance = 0
+    for dimension in DIMENSIONS:
+        total_distance += (profile1[dimension] - profile2[dimension]) ** 2
+    
+    # Convert distance to alignment (closer = higher alignment)
+    max_distance = len(DIMENSIONS) * 4  # Maximum possible distance
+    alignment = 1 - (total_distance / max_distance)
+    return max(0, alignment)
+
+def get_post_political_lean(post_content):
+    """Determine political lean of post based on content"""
+    for demo_post in DEMO_POSTS:
+        if demo_post['content'] == post_content:
+            return demo_post['author_bias']
+    return 'center'
+
+def should_user_react_to_post(user, post, post_bias):
+    """Determine if user should react to post and what reaction"""
+    user_profile = user.profile
+    
+    # Calculate political distance
+    if post_bias == 'right':
+        post_profile = {'left_right': 0.8, 'liberal_conservative': 0.7, 'zionist_anti': 0.8}
+    elif post_bias == 'left':
+        post_profile = {'left_right': -0.8, 'liberal_conservative': -0.7, 'zionist_anti': -0.5}
+    else:  # center
+        post_profile = {'left_right': 0.0, 'liberal_conservative': 0.0, 'zionist_anti': 0.2}
+    
+    alignment = calculate_political_alignment(user_profile, post_profile)
+    
+    # Probability of reacting increases with alignment
+    react_probability = 0.3 + (alignment * 0.6)  # 30-90% chance
+    
+    if random.random() > react_probability:
+        return None
+    
+    # Choose reaction based on alignment
+    if alignment > 0.7:  # Strong agreement
+        return random.choice(['like', 'love', 'interested'])
+    elif alignment > 0.5:  # Moderate agreement
+        return random.choice(['like', 'interested', 'empathy'])
+    elif alignment > 0.3:  # Neutral/curious
+        return random.choice(['interested', 'empathy', 'laugh'])
+    else:  # Disagreement
+        if random.random() < 0.3:  # 30% chance to engage with opposing views
+            return random.choice(['interested', 'empathy'])
+        else:
+            return random.choice(['angry', 'laugh'])  # More likely to express disagreement
+    
+def initialize_demo_data():
+    """Initialize demo users, posts, and reactions"""
+    global users, posts, comments, reactions
+    
+    # Clear existing data
+    users.clear()
+    posts.clear()
+    comments.clear()
+    reactions.clear()
+    
+    # Create demo users
+    for i, demo_user in enumerate(DEMO_USERS, 1):
+        user = User(i, demo_user['name'])
+        user.profile = demo_user['profile'].copy()
+        users[i] = user
+    
+    # Create demo posts
+    user_ids = list(users.keys())
+    for i, demo_post in enumerate(DEMO_POSTS, 1):
+        # Select appropriate author based on post bias
+        post_bias = demo_post['author_bias']
+        if post_bias == 'right':
+            author_id = random.choice([1, 2, 3, 4])  # Right-wing users
+        elif post_bias == 'left':
+            author_id = random.choice([5, 6, 7, 8])  # Left-wing users
+        else:
+            author_id = random.choice([9, 10, 11, 12])  # Centrist users
+        
+        post = Post(i, author_id, demo_post['content'])
+        posts.append(post)
+        
+        # Generate reactions from users
+        for user_id, user in users.items():
+            if user_id == author_id:
+                continue  # User doesn't react to their own post
+            
+            reaction_type = should_user_react_to_post(user, post, post_bias)
+            if reaction_type:
+                reaction = Reaction(user_id, 'post', post.id, reaction_type)
+                reactions.append(reaction)
+                post.reactions.append({
+                    'user_id': user_id,
+                    'type': reaction_type
+                })
+        
+        # Calculate diversity score
+        post_reactions = [r for r in reactions if r.target_type == 'post' and r.target_id == post.id]
+        post.diversity_score = calculate_diversity_score(post_reactions)
+    
+    print(f"Demo initialized: {len(users)} users, {len(posts)} posts, {len(reactions)} reactions")
+
 # API Routes
 
 @app.route('/')
@@ -164,7 +318,6 @@ def handle_users():
         user = User(user_id, data['name'])
         
         # אתחול אקראי של פרופיל (לצורך POC)
-        import random
         for dimension in DIMENSIONS:
             user.profile[dimension] = random.uniform(-1, 1)
         
@@ -249,6 +402,21 @@ def get_stats():
         'total_reactions': len(reactions),
         'avg_diversity_score': sum(p.diversity_score for p in posts) / len(posts) if posts else 0
     })
+
+@app.route('/api/demo/initialize', methods=['POST'])
+def initialize_demo():
+    """Initialize demo mode with sample data"""
+    initialize_demo_data()
+    return jsonify({'status': 'success', 'message': 'Demo data initialized'})
+
+@app.route('/api/demo/reset', methods=['POST'])
+def reset_demo():
+    """Reset all data"""
+    users.clear()
+    posts.clear()
+    comments.clear()
+    reactions.clear()
+    return jsonify({'status': 'success', 'message': 'All data cleared'})
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
