@@ -68,6 +68,11 @@ python app.py
 
 Then open: **http://localhost:5000**
 
+#### Access a running instance
+There is a live instance running on:
+http://46.101.134.165:5000/
+feel free to visit it
+
 ### How Does It Work?
 
 1. **Start**: Each user begins with a random profile in the three dimensions
