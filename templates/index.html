@@ -265,6 +265,112 @@
             border-radius: 6px;
         }
         
+        .diversity-chart {
+            display: none;
+            margin-top: 15px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e4e6eb;
+        }
+        
+        .diversity-chart.visible {
+            display: block;
+        }
+        
+        .chart-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #050505;
+        }
+        
+        .chart-axis {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 12px;
+            color: #65676b;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 200px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+        
+        .chart-line {
+            position: absolute;
+            bottom: 0;
+            width: 1px;
+            background: #ddd;
+        }
+        
+        .center-line {
+            left: 50%;
+            height: 100%;
+            background: #999;
+            border-left: 2px dashed #999;
+        }
+        
+        .reaction-dot {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .reaction-dot:hover {
+            transform: scale(1.5);
+            z-index: 10;
+        }
+        
+        .reaction-dot[data-reaction="like"] { background: #1877f2; }
+        .reaction-dot[data-reaction="love"] { background: #e41e3f; }
+        .reaction-dot[data-reaction="angry"] { background: #f7b125; }
+        .reaction-dot[data-reaction="laugh"] { background: #f7b125; }
+        .reaction-dot[data-reaction="interested"] { background: #f7b125; }
+        .reaction-dot[data-reaction="empathy"] { background: #f7b125; }
+        
+        .chart-legend {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            font-size: 11px;
+            color: #65676b;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+        
+        .show-diversity-btn {
+            background: #e7f3ff;
+            color: #1877f2;
+            font-size: 13px;
+            padding: 8px 16px;
+            margin-top: 10px;
+        }
+        
+        .show-diversity-btn:hover {
+            background: #d8ebff;
+        }
+        
         .legend {
             background: white;
             padding: 15px;
@@ -363,7 +469,14 @@
                 resetBtn: '🗑️ Reset All',
                 demoLoadedMsg: 'Demo loaded! 16 users with diverse political views and 12 posts with reactions.',
                 resetConfirm: 'Are you sure you want to reset all data?',
-                resetDoneMsg: 'All data cleared!'
+                resetDoneMsg: 'All data cleared!',
+                showDiversityBtn: '📊 Show Diversity Data',
+                hideDiversityBtn: '📊 Hide Diversity Data',
+                diversityChartTitle: 'Political Spectrum Distribution',
+                leftWing: 'Left',
+                center: 'Center',
+                rightWing: 'Right',
+                reactionWeights: 'Reaction weights: ❤️ Love (+3), 👍 Like (+2), 🤔 Interested (+1), 🤗 Empathy (+1), 😂 Laugh (0), 😠 Angry (-0.5)'
             },
             he: {
                 mainTitle: '🌈 רשת חברתית עם ציון גיוון',
@@ -396,13 +509,13 @@
                 demoLoadedMsg: 'דמו נטען! 16 משתמשים עם דעות פוליטיות מגוונות ו-12 פוסטים עם תגובות.',
                 resetConfirm: 'האם אתה בטוח שברצונך לאפס את כל הנתונים?',
                 resetDoneMsg: 'כל הנתונים נמחקו!',
-                demoInfo: '🎭 מצב דמו: יוצר 18 משתמשים ממחנות פוליטיים שונים עם אינטראקציות ריאליסטיות',
-                demoBtn: 'טען דמו',
-                clearBtn: 'נקה הכל',
-                demoLoading: 'יוצר דמו...',
-                demoSuccess: 'הדמו נטען! בדוק את הפוסטים הממוינים לפי ציון הגיוון.',
-                clearConfirm: 'האם אתה בטוח שברצונך למחוק את כל הנתונים? לא ניתן לבטל פעולה זו.',
-                clearSuccess: 'כל הנתונים נמחקו בהצלחה!'
+                showDiversityBtn: '📊 הצג נתוני שונות',
+                hideDiversityBtn: '📊 הסתר נתוני שונות',
+                diversityChartTitle: 'התפלגות על הספקטרום הפוליטי',
+                leftWing: 'שמאל',
+                center: 'מרכז',
+                rightWing: 'ימין',
+                reactionWeights: 'משקלות תגובות: ❤️ אהבה (+3), 👍 לייק (+2), 🤔 מעניין (+1), 🤗 אמפתיה (+1), 😂 צחוק (0), 😠 כועס (-0.5)'
             }
         };
         
@@ -449,6 +562,68 @@
             'interested': '🤔',
             'empathy': '🤗'
         };
+        
+        const REACTION_WEIGHTS = {
+            'love': 3,
+            'like': 2,
+            'interested': 1,
+            'empathy': 1,
+            'laugh': 0,
+            'angry': -0.5
+        };
+        
+        function toggleDiversityChart(postId) {
+            const chart = document.getElementById(`diversity-chart-${postId}`);
+            const btn = document.getElementById(`diversity-btn-${postId}`);
+            const t = translations[currentLang];
+            
+            if (chart.classList.contains('visible')) {
+                chart.classList.remove('visible');
+                btn.textContent = t.showDiversityBtn;
+            } else {
+                chart.classList.add('visible');
+                btn.textContent = t.hideDiversityBtn;
+                renderDiversityChart(postId);
+            }
+        }
+        
+        function renderDiversityChart(postId) {
+            const post = posts.find(p => p.id === postId);
+            if (!post) return;
+            
+            const t = translations[currentLang];
+            const container = document.getElementById(`chart-container-${postId}`);
+            container.innerHTML = '<div class="chart-line center-line"></div>';
+            
+            // Calculate weighted positions for each reaction
+            post.reactions.forEach((reaction, index) => {
+                const user = users.find(u => u.id === reaction.user_id);
+                if (!user) return;
+                
+                // Get user's left-right position (-1 to 1)
+                const politicalPosition = user.profile.left_right;
+                
+                // Get reaction weight
+                const reactionWeight = REACTION_WEIGHTS[reaction.type] || 0;
+                
+                // Convert political position to pixel position (0 to 100%)
+                const xPosition = ((politicalPosition + 1) / 2) * 100;
+                
+                // Y position based on weight (bottom = negative, top = positive)
+                const maxWeight = 3;
+                const yPosition = ((reactionWeight + 0.5) / (maxWeight + 0.5)) * 100;
+                
+                // Create dot
+                const dot = document.createElement('div');
+                dot.className = 'reaction-dot';
+                dot.setAttribute('data-reaction', reaction.type);
+                dot.style.left = `calc(${xPosition}% - 6px)`;
+                dot.style.bottom = `calc(${yPosition}% - 6px)`;
+                dot.title = `${user.name}: ${REACTIONS[reaction.type]} (${politicalPosition.toFixed(2)})`;
+                
+                container.appendChild(dot);
+            });
+        }
         
         async function loadStats() {
             const res = await fetch('/api/stats');
@@ -643,6 +818,38 @@
                             </button>
                         `).join('')}
                     </div>
+                    ${post.reactions.length >= 2 ? `
+                        <button class="show-diversity-btn" id="diversity-btn-${post.id}" onclick="toggleDiversityChart(${post.id})">
+                            ${t.showDiversityBtn}
+                        </button>
+                        <div class="diversity-chart" id="diversity-chart-${post.id}">
+                            <div class="chart-title">${t.diversityChartTitle}</div>
+                            <div class="chart-axis">
+                                <span>${t.leftWing}</span>
+                                <span>${t.center}</span>
+                                <span>${t.rightWing}</span>
+                            </div>
+                            <div class="chart-container" id="chart-container-${post.id}"></div>
+                            <div class="chart-legend">
+                                <div class="legend-item">
+                                    <div class="legend-dot" style="background: #e41e3f;"></div>
+                                    <span>❤️ Love (+3)</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-dot" style="background: #1877f2;"></div>
+                                    <span>👍 Like (+2)</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-dot" style="background: #f7b125;"></div>
+                                    <span>🤔 Interested (+1) | 🤗 Empathy (+1)</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-dot" style="background: #65676b;"></div>
+                                    <span>😂 Laugh (0) | 😠 Angry (-0.5)</span>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
                     <div class="comments-section">
                         ${comments.map(comment => {
                             const commentReactionCounts = getReactionCounts(comment.reactions);

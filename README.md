@@ -54,6 +54,8 @@ This POC serves as a testbed for the diversity scoring concepts before integrati
 
 ![Screenshot POC - Bridge Demo.png](Screenshot%20POC%20-%20Bridge%20Demo.png)
 
+![Screenshot - Political Spectrum Distribution.png](Screenshot%20-%20Political%20Spectrum%20Distribution.png)
+
 ### How to Run
 
 ```bash
